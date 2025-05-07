@@ -11,8 +11,8 @@ import java.util.Optional;
 // Badge
 public interface BadgeRepository extends JpaRepository<Badge, Long> {
     Optional<Badge> findByCode(String code);
-    boolean existsByUserAndBadge(User user, Badge badge);
-    List<UserBadge> findByUser(User user);
+    
+
 
 
 }
