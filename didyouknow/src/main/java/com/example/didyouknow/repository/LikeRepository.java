@@ -11,4 +11,13 @@ import java.util.Optional;
 public interface LikeRepository extends JpaRepository<Like, Long> {
     Optional<Like> findByUserAndTargetTypeAndTargetId(User user, String targetType, Long targetId);
     List<Like> findByUser(User user);
+
+    
+
+    boolean existsByUserAndTargetTypeAndTargetId(User user, String targetType, Long targetId);
+
+    void deleteByUserIdAndTargetId(User user, Long targetId);
+
+    void deleteByUserAndTargetId(User user, Long targetId);
+
 }

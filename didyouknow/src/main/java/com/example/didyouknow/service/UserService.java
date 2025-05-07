@@ -1,47 +1,49 @@
 package com.example.didyouknow.service;
 
-
-
 import com.example.didyouknow.domain.User;
-import com.example.didyouknow.dto.*;
+import com.example.didyouknow.dto.user.SignupRequest;
+import com.example.didyouknow.dto.user.UserResponse;
 import com.example.didyouknow.repository.UserRepository;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
+import java.time.LocalDateTime;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class UserService {
 
     private final UserRepository userRepository;
 
-    public void signup(SignupRequest req) {
+    public UserResponse signup(SignupRequest request) {
+        // 이메일 중복 + 같은 providerId가 있을 경우 중복 가입 방지
+        boolean userExists = userRepository.findByEmail(request.getEmail())
+                .filter(u -> u.getProviderId().equals(request.getProviderId()))
+                .isPresent();
+
+        if (userExists) {
+            throw new IllegalArgumentException("이미 가입된 사용자입니다.");
+        }
+
         User user = new User();
-        user.setEmail(req.getEmail());
-        user.setPassword(req.getPassword()); // 실제 구현 시 암호화 필요
-        user.setNickname(req.getNickname());
-        userRepository.save(user);
-    }
+        user.setEmail(request.getEmail());
+        user.setNickname(request.getNickname());
+        user.setProfileImageUrl(request.getProfileImageUrl());
+        user.setProvider(request.getProvider());
+        user.setProviderId(request.getProviderId());
+        user.setRole("USER");
+        user.setStatus("ACTIVE");
+        user.setPushTime(0);
+        user.setCreatedAt(LocalDateTime.now());
+        user.setUpdatedAt(LocalDateTime.now());
 
-    public String login(LoginRequest req) {
-        Optional<User> userOpt = userRepository.findByEmail(req.getEmail());
-        if (userOpt.isEmpty()) {
-            throw new RuntimeException("유저 없음");
-        }
-        User user = userOpt.get();
-        if (!user.getPassword().equals(req.getPassword())) {
-            throw new RuntimeException("비밀번호 불일치");
-        }
-        return "mock-token"; // 실제로는 JWT 반환
-    }
+        User saved = userRepository.save(user);
 
-    public UserProfile getMyProfile() {
-        // 실제로는 인증된 사용자 기준으로 반환해야 함
-        return new UserProfile("홍길동", "https://example.com/image.png");
-    }
-
-    public void updateProfile(UpdateProfileRequest req) {
-        // 인증 처리 후 사용자 정보 수정
+        return new UserResponse(
+                saved.getId(),
+                saved.getEmail(),
+                saved.getNickname(),
+                saved.getProfileImageUrl()
+        );
     }
 }

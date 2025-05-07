@@ -3,9 +3,14 @@ package com.example.didyouknow.domain;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
-
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 @Entity
 @Table(name = "follows")
+@Getter
+@Setter
+@NoArgsConstructor
 public class Follow {
 
     @Id
@@ -21,4 +26,6 @@ public class Follow {
     private User following;
 
     private LocalDateTime createdAt;
+
+
 }
