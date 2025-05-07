@@ -1,8 +1,6 @@
 package com.example.didyouknow.service;
 
 
-import com.example.didyouknow.dto.PostRequest;
-import com.example.didyouknow.dto.PostResponse;
 import com.example.didyouknow.repository.UserRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;

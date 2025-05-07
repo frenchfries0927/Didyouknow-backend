@@ -1,4 +1,6 @@
-package com.example.didyouknow.dto;
+package com.example.didyouknow.dto.user;
+
+
 
 import lombok.Getter;
 

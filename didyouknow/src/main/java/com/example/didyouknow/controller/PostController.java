@@ -2,8 +2,6 @@ package com.example.didyouknow.controller;
 
 
 
-import com.example.didyouknow.dto.PostRequest;
-import com.example.didyouknow.dto.PostResponse;
 import com.example.didyouknow.service.PostService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
