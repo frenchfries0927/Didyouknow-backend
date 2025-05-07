@@ -1,11 +1,10 @@
 package com.example.didyouknow.dto;
 
+import lombok.Getter;
 
-import lombok.Data;
-
-@Data
+@Getter
 public class SignupRequest {
     private String email;
-    private String password;
     private String nickname;
+    private String password;
 }
