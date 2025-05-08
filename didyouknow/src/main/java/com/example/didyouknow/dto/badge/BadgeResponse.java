@@ -8,6 +8,7 @@ import lombok.Getter;
 public class BadgeResponse {
     private Long id;
     private String code;
+
     private String name;
     private String earnedAt;
 

@@ -1,36 +1,40 @@
 package com.example.didyouknow.domain;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-
-
-import java.time.LocalDateTime;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.time.LocalDateTime;
+
 @Getter
 @Setter
 @Entity
 @Table(name = "users")
 public class User {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String email;
     private String nickname;
+
+    @Column(name = "profile_image_url")
     private String profileImageUrl;
+
     private String provider;
+
+    @Column(name = "provider_id")
     private String providerId;
+
     private String status;
     private String role;
+
+    @Column(name = "push_time")
     private Integer pushTime;
 
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
 
-    // 관계 매핑 생략 (예: @OneToMany -> follows, posts, comments 등)
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
 }
