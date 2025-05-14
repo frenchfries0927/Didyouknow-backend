@@ -18,7 +18,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 // 모든 API 요청 허용
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/**").permitAll()
+                        .requestMatchers("/api/**", "/auth/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 // 기본 로그인 비활성화
