@@ -10,4 +10,6 @@ public class TmiController {
     public String getTodayTmi() {
         return "오늘의 TMI: 사람도 왼발잡이가 있듯이, 개도 있다!";
     }
+
+
 }
