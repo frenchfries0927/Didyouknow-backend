@@ -2,11 +2,15 @@ package com.example.didyouknow.controller;
 
 import com.example.didyouknow.dto.post.KnowledgePostRequest;
 import com.example.didyouknow.dto.post.KnowledgePostResponse;
+import com.example.didyouknow.service.FileStorageService;
 import com.example.didyouknow.service.KnowledgePostService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -15,12 +19,40 @@ import java.util.List;
 public class PostController {
 
     private final KnowledgePostService knowledgePostService;
+    private final FileStorageService fileStorageService;
 
-    @PostMapping
-    public ResponseEntity<KnowledgePostResponse> create(@RequestParam Long userId,
-                                                        @RequestBody KnowledgePostRequest request) {
-        KnowledgePostResponse response = knowledgePostService.create(userId, request);
-        return ResponseEntity.ok(response);
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<KnowledgePostResponse> create(
+            @RequestParam("userId") Long userId,
+            @RequestParam("title") String title,
+            @RequestParam("content") String content,
+            @RequestParam(value = "publishDate", required = false, defaultValue = "2025-01-01") String publishDate,
+            @RequestPart(value = "images", required = false) List<MultipartFile> images) {
+        
+        try {
+            // 이미지 업로드 처리
+            List<String> imageUrls = new ArrayList<>();
+            if (images != null && !images.isEmpty()) {
+                for (MultipartFile image : images) {
+                    if (!image.isEmpty()) {
+                        String imageUrl = fileStorageService.storeFile(image);
+                        imageUrls.add(imageUrl);
+                    }
+                }
+            }
+
+            // KnowledgePostRequest 객체 생성
+            KnowledgePostRequest request = new KnowledgePostRequest();
+            request.setTitle(title);
+            request.setContent(content);
+            request.setPublishDate(publishDate);
+            
+            KnowledgePostResponse response = knowledgePostService.create(userId, request, imageUrls);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("게시글 생성 중 오류가 발생했습니다: " + e.getMessage());
+        }
     }
 
     @GetMapping

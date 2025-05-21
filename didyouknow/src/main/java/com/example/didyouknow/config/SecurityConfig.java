@@ -17,10 +17,13 @@ public class SecurityConfig {
         http
                 // CSRF 비활성화 (최신 방식)
                 .csrf(csrf -> csrf.disable())
+                .cors(cors -> cors.disable())
                 // 모든 API 요청 허용
                 .authorizeHttpRequests(auth -> auth
+
                         .requestMatchers("/auth/**").permitAll()
                         .anyRequest().authenticated()
+
                 )
                 .addFilterBefore(jwtAuthenticationFilter, org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class)
                 // 기본 로그인 비활성화

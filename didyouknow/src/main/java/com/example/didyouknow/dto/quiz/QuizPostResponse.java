@@ -3,6 +3,8 @@ package com.example.didyouknow.dto.quiz;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import java.util.List;
+
 @Getter
 @AllArgsConstructor
 public class QuizPostResponse {
@@ -11,4 +13,5 @@ public class QuizPostResponse {
     private String[] options;
     private String authorNickname;
     private String publishDate;
+    private List<String> imageUrls;
 }
