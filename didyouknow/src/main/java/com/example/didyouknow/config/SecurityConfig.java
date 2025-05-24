@@ -16,7 +16,7 @@ public class SecurityConfig {
         http
                 // CSRF 비활성화 (최신 방식)
                 .csrf(csrf -> csrf.disable())
-                .cors(cors -> cors.disable())
+                .cors(Customizer.withDefaults())
                 // 모든 API 요청 허용
                 .authorizeHttpRequests(auth -> auth
                         .anyRequest().permitAll()
