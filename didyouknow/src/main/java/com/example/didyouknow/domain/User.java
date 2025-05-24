@@ -32,6 +32,10 @@ public class User {
     @Column(name = "push_time")
     private Integer pushTime;
 
+    @Column(nullable = true)
+    private boolean alarmEnabled = true;
+
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 

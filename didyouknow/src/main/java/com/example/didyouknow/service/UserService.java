@@ -1,6 +1,7 @@
 package com.example.didyouknow.service;
 
 import com.example.didyouknow.domain.User;
+import com.example.didyouknow.dto.user.ProfileRequest;
 import com.example.didyouknow.dto.user.SignupRequest;
 import com.example.didyouknow.dto.user.UserResponse;
 import com.example.didyouknow.repository.UserRepository;
@@ -43,7 +44,20 @@ public class UserService {
                 saved.getId(),
                 saved.getEmail(),
                 saved.getNickname(),
-                saved.getProfileImageUrl()
+                saved.getProfileImageUrl(),
+                saved.getRole()
         );
+    }
+
+    public void completeProfile(Long userId, ProfileRequest request) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+
+        user.setNickname(request.getNickname());
+        user.setPushTime(request.getPushTime());
+        user.setAlarmEnabled(request.isAlarmEnabled());
+        user.setStatus("ACTIVE");
+        user.setUpdatedAt(LocalDateTime.now());
+        userRepository.save(user);
     }
 }

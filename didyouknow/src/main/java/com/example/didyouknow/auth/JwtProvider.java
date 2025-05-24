@@ -1,31 +1,77 @@
 package com.example.didyouknow.auth;
 
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.algorithms.Algorithm;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.security.Key;
 import java.util.Date;
 
 @Component
 public class JwtProvider {
-    private final String secret = "your_jwt_secret_key"; // 환경변수로 관리 권장
-    private final Algorithm algorithm = Algorithm.HMAC256(secret);
 
-    public String generateToken(String email, String name) {
-        return JWT.create()
-                .withSubject(email)
-                .withClaim("name", name)
-                .withIssuedAt(new Date())
-                .withExpiresAt(new Date(System.currentTimeMillis() + 1000 * 60 * 60)) // 1시간
-                .sign(algorithm);
+    @Value("${jwt.secret}")
+    private String secretKeyPlain;
+
+    private Key secretKey;
+
+    private static final long ACCESS_TOKEN_VALIDITY = 1000 * 60 * 60; // 1시간
+
+    @PostConstruct
+    public void init() {
+        this.secretKey = Keys.hmacShaKeyFor(secretKeyPlain.getBytes());
     }
 
+    // JWT 발급
+    public String generateToken(Long userId, String email, String role, String status) {
+        return Jwts.builder()
+                .setSubject(email)
+                .claim("userId", userId)
+                .claim("role", role)
+                .claim("status", status) // ex. "REGISTERED" or "ACTIVE"
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + ACCESS_TOKEN_VALIDITY))
+                .signWith(secretKey, SignatureAlgorithm.HS256)
+                .compact();
+    }
+
+
+    // JWT 유효성 검사
     public boolean validateToken(String token) {
         try {
-            JWT.require(algorithm).build().verify(token);
+            Jwts.parserBuilder()
+                    .setSigningKey(secretKey)
+                    .build()
+                    .parseClaimsJws(token);
             return true;
-        } catch (Exception e) {
+        } catch (JwtException | IllegalArgumentException e) {
             return false;
         }
+    }
+
+    // Claims 추출
+    private Claims getClaims(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(secretKey)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+    }
+
+    public String getEmailFromToken(String token) {
+        return getClaims(token).getSubject();
+    }
+
+    public Long getUserIdFromToken(String token) {
+        return getClaims(token).get("userId", Long.class);
+    }
+
+    public String getNameFromToken(String token) {
+        return getClaims(token).get("name", String.class);
     }
 }
