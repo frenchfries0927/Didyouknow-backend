@@ -32,13 +32,26 @@ public class FileStorageService {
         // 원본 파일명 정리
         String originalFileName = StringUtils.cleanPath(file.getOriginalFilename());
         
+        // 파일명이 null이거나 비어있는 경우 처리
+        if (originalFileName == null || originalFileName.isEmpty()) {
+            originalFileName = "unknown_file";
+        }
+        
         // 파일명 유효성 검사
         if (originalFileName.contains("..")) {
             throw new FileStorageException("파일명에 잘못된 경로 문자가 포함되어 있습니다: " + originalFileName);
         }
 
         // 중복 방지를 위한 고유 파일명 생성
-        String fileExtension = originalFileName.substring(originalFileName.lastIndexOf("."));
+        String fileExtension = "";
+        int lastIndex = originalFileName.lastIndexOf(".");
+        if (lastIndex > 0) {
+            fileExtension = originalFileName.substring(lastIndex);
+        } else {
+            // 확장자가 없는 경우 기본 확장자 추가
+            fileExtension = ".jpg";
+        }
+        
         String uniqueFileName = UUID.randomUUID().toString() + fileExtension;
 
         try {
