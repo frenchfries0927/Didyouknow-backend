@@ -18,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -83,8 +84,8 @@ public class UserService {
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
 
         // 게시물 수 계산 (KnowledgePost + QuizPost)
-        int knowledgePostsCount = knowledgePostRepository.findByAuthor(user).size();
-        int quizPostsCount = quizPostRepository.findByAuthor(user).size();
+        int knowledgePostsCount = knowledgePostRepository.findByAuthorOrderByCreatedAtDesc(user).size();
+        int quizPostsCount = quizPostRepository.findByAuthorOrderByCreatedAtDesc(user).size();
         int postsCount = knowledgePostsCount + quizPostsCount;
         
         // 팔로워 수 계산
@@ -112,28 +113,41 @@ public class UserService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
 
-        // KnowledgePost 조회
-        List<KnowledgePost> knowledgePosts = knowledgePostRepository.findByAuthor(user);
+        // KnowledgePost 조회 (최신순)
+        List<KnowledgePost> knowledgePosts = knowledgePostRepository.findByAuthorOrderByCreatedAtDesc(user);
         
-        // QuizPost 조회
-        List<QuizPost> quizPosts = quizPostRepository.findByAuthor(user);
+        // QuizPost 조회 (최신순)
+        List<QuizPost> quizPosts = quizPostRepository.findByAuthorOrderByCreatedAtDesc(user);
         
-        // 모든 게시물을 KnowledgePostResponse 형태로 변환
-        List<KnowledgePostResponse> allPosts = new ArrayList<>();
+        // 모든 게시물을 시간과 함께 저장할 임시 클래스
+        class PostWithTime {
+            KnowledgePostResponse response;
+            LocalDateTime createdTime;
+            
+            PostWithTime(KnowledgePostResponse response, LocalDateTime createdTime) {
+                this.response = response;
+                this.createdTime = createdTime;
+            }
+        }
         
-        // KnowledgePost 변환
-        allPosts.addAll(knowledgePosts.stream()
-                .map(this::convertToKnowledgePostResponse)
-                .collect(Collectors.toList()));
+        List<PostWithTime> allPostsWithTime = new ArrayList<>();
         
-        // QuizPost를 KnowledgePostResponse 형태로 변환
-        allPosts.addAll(quizPosts.stream()
-                .map(this::convertQuizToKnowledgePostResponse)
-                .collect(Collectors.toList()));
+        // KnowledgePost 변환 (createdAt 사용)
+        for (KnowledgePost post : knowledgePosts) {
+            KnowledgePostResponse response = convertToKnowledgePostResponse(post);
+            allPostsWithTime.add(new PostWithTime(response, post.getCreatedAt()));
+        }
         
-        // 최신순으로 정렬 (publishDate 기준)
-        return allPosts.stream()
-                .sorted((a, b) -> b.getPublishDate().compareTo(a.getPublishDate()))
+        // QuizPost 변환 (createdAt 사용)
+        for (QuizPost quiz : quizPosts) {
+            KnowledgePostResponse response = convertQuizToKnowledgePostResponse(quiz);
+            allPostsWithTime.add(new PostWithTime(response, quiz.getCreatedAt()));
+        }
+        
+        // LocalDateTime으로 정렬 후 응답 객체만 반환 (초 단위까지 정확한 정렬)
+        return allPostsWithTime.stream()
+                .sorted((a, b) -> b.createdTime.compareTo(a.createdTime)) // 최신순
+                .map(item -> item.response)
                 .collect(Collectors.toList());
     }
 

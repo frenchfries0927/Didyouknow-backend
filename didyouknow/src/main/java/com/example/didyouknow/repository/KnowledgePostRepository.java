@@ -8,5 +8,5 @@ import java.util.List;
 
 // KnowledgePost
 public interface KnowledgePostRepository extends JpaRepository<KnowledgePost, Long> {
-    List<KnowledgePost> findByAuthor(User author);
+    List<KnowledgePost> findByAuthorOrderByCreatedAtDesc(User author);
 }

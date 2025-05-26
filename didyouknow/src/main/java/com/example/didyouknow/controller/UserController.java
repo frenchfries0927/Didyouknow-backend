@@ -47,4 +47,16 @@ public class UserController {
         List<UserSearchResponse> users = userService.searchUsers(keyword, userId);
         return ResponseEntity.ok(users);
     }
+
+    @GetMapping("/{targetUserId}/profile")
+    public ResponseEntity<UserProfileResponse> getUserProfile(@PathVariable Long targetUserId) {
+        UserProfileResponse profile = userService.getUserProfile(targetUserId);
+        return ResponseEntity.ok(profile);
+    }
+
+    @GetMapping("/{targetUserId}/posts")
+    public ResponseEntity<List<KnowledgePostResponse>> getUserPosts(@PathVariable Long targetUserId) {
+        List<KnowledgePostResponse> posts = userService.getUserPosts(targetUserId);
+        return ResponseEntity.ok(posts);
+    }
 }
