@@ -10,4 +10,6 @@ import java.util.List;
 public interface FollowRepository extends JpaRepository<Follow, Long> {
     List<Follow> findByFollower(User follower);
     List<Follow> findByFollowing(User following);
+    int countByFollower(User follower);
+    int countByFollowing(User following);
 }
