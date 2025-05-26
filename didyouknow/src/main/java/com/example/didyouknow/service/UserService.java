@@ -6,6 +6,7 @@ import com.example.didyouknow.dto.user.ProfileRequest;
 import com.example.didyouknow.dto.user.SignupRequest;
 import com.example.didyouknow.dto.user.UserResponse;
 import com.example.didyouknow.dto.user.UserProfileResponse;
+import com.example.didyouknow.dto.user.UserSearchResponse;
 import com.example.didyouknow.dto.post.KnowledgePostResponse;
 import com.example.didyouknow.repository.UserRepository;
 import com.example.didyouknow.repository.KnowledgePostRepository;
@@ -108,6 +109,28 @@ public class UserService {
         
         return posts.stream()
                 .map(this::convertToKnowledgePostResponse)
+                .collect(Collectors.toList());
+    }
+
+    public List<UserSearchResponse> searchUsers(String keyword, Long currentUserId) {
+        List<User> users = userRepository.findByNicknameContainingIgnoreCase(keyword);
+        User currentUser = userRepository.findById(currentUserId).orElse(null);
+        
+        return users.stream()
+                .filter(user -> !user.getId().equals(currentUserId)) // 자기 자신 제외
+                .map(user -> {
+                    boolean isFollowing = false;
+                    if (currentUser != null) {
+                        isFollowing = followRepository.findByFollower(currentUser).stream()
+                                .anyMatch(f -> f.getFollowing().equals(user));
+                    }
+                    return new UserSearchResponse(
+                            user.getId(),
+                            user.getNickname(),
+                            user.getProfileImageUrl(),
+                            isFollowing
+                    );
+                })
                 .collect(Collectors.toList());
     }
 

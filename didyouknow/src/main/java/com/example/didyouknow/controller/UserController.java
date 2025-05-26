@@ -3,6 +3,7 @@ package com.example.didyouknow.controller;
 import com.example.didyouknow.dto.user.ProfileRequest;
 import com.example.didyouknow.dto.user.UserProfileResponse;
 import com.example.didyouknow.dto.post.KnowledgePostResponse;
+import com.example.didyouknow.dto.user.UserSearchResponse;
 import com.example.didyouknow.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,5 +39,12 @@ public class UserController {
     public ResponseEntity<List<KnowledgePostResponse>> getMyPosts(@AuthenticationPrincipal Long userId) {
         List<KnowledgePostResponse> posts = userService.getUserPosts(userId);
         return ResponseEntity.ok(posts);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<UserSearchResponse>> searchUsers(@RequestParam("keyword") String keyword,
+                                                               @AuthenticationPrincipal Long userId) {
+        List<UserSearchResponse> users = userService.searchUsers(keyword, userId);
+        return ResponseEntity.ok(users);
     }
 }

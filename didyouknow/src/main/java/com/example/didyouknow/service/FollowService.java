@@ -67,4 +67,14 @@ public class FollowService {
                         f.getFollowing().getProfileImageUrl()))
                 .toList();
     }
+
+    public boolean isFollowing(Long followerId, Long followingId) {
+        User follower = userRepository.findById(followerId)
+                .orElseThrow(() -> new IllegalArgumentException("팔로우 요청자 없음"));
+        User following = userRepository.findById(followingId)
+                .orElseThrow(() -> new IllegalArgumentException("팔로우 대상 없음"));
+
+        return followRepository.findByFollower(follower).stream()
+                .anyMatch(f -> f.getFollowing().equals(following));
+    }
 }
