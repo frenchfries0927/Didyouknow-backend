@@ -6,6 +6,7 @@ import com.example.didyouknow.dto.user.UserProfileResponse;
 import com.example.didyouknow.dto.post.KnowledgePostResponse;
 import com.example.didyouknow.dto.user.UserSearchResponse;
 import com.example.didyouknow.service.UserService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +18,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
+@Tag(name = "User API", description = "유저 도메인 API")
 public class UserController {
 
     @Autowired

@@ -4,6 +4,7 @@ import com.example.didyouknow.dto.post.KnowledgePostRequest;
 import com.example.didyouknow.dto.post.KnowledgePostResponse;
 import com.example.didyouknow.service.FileStorageService;
 import com.example.didyouknow.service.KnowledgePostService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +17,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/posts")
 @RequiredArgsConstructor
+@Tag(name = "KnowledgePost API", description = "지식게시글 도메인 API")
 public class PostController {
 
     private final KnowledgePostService knowledgePostService;
