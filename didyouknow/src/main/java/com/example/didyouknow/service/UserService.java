@@ -2,6 +2,7 @@ package com.example.didyouknow.service;
 
 import com.example.didyouknow.domain.User;
 import com.example.didyouknow.domain.KnowledgePost;
+import com.example.didyouknow.domain.QuizPost;
 import com.example.didyouknow.dto.user.ProfileRequest;
 import com.example.didyouknow.dto.user.SignupRequest;
 import com.example.didyouknow.dto.user.UserResponse;
@@ -10,13 +11,17 @@ import com.example.didyouknow.dto.user.UserSearchResponse;
 import com.example.didyouknow.dto.post.KnowledgePostResponse;
 import com.example.didyouknow.repository.UserRepository;
 import com.example.didyouknow.repository.KnowledgePostRepository;
+import com.example.didyouknow.repository.QuizPostRepository;
 import com.example.didyouknow.repository.FollowRepository;
 import com.example.didyouknow.repository.UserBadgeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.stream.Collectors;
 
 @Service
@@ -25,6 +30,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final KnowledgePostRepository knowledgePostRepository;
+    private final QuizPostRepository quizPostRepository;
     private final FollowRepository followRepository;
     private final UserBadgeRepository userBadgeRepository;
 
@@ -77,8 +83,10 @@ public class UserService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
 
-        // 게시물 수 계산
-        int postsCount = knowledgePostRepository.findByAuthor(user).size();
+        // 게시물 수 계산 (KnowledgePost + QuizPost)
+        int knowledgePostsCount = knowledgePostRepository.findByAuthorOrderByCreatedAtDesc(user).size();
+        int quizPostsCount = quizPostRepository.findByAuthorOrderByCreatedAtDesc(user).size();
+        int postsCount = knowledgePostsCount + quizPostsCount;
         
         // 팔로워 수 계산
         int followersCount = followRepository.countByFollowing(user);
@@ -105,10 +113,41 @@ public class UserService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
 
-        List<KnowledgePost> posts = knowledgePostRepository.findByAuthor(user);
+        // KnowledgePost 조회 (최신순)
+        List<KnowledgePost> knowledgePosts = knowledgePostRepository.findByAuthorOrderByCreatedAtDesc(user);
         
-        return posts.stream()
-                .map(this::convertToKnowledgePostResponse)
+        // QuizPost 조회 (최신순)
+        List<QuizPost> quizPosts = quizPostRepository.findByAuthorOrderByCreatedAtDesc(user);
+        
+        // 모든 게시물을 시간과 함께 저장할 임시 클래스
+        class PostWithTime {
+            KnowledgePostResponse response;
+            LocalDateTime createdTime;
+            
+            PostWithTime(KnowledgePostResponse response, LocalDateTime createdTime) {
+                this.response = response;
+                this.createdTime = createdTime;
+            }
+        }
+        
+        List<PostWithTime> allPostsWithTime = new ArrayList<>();
+        
+        // KnowledgePost 변환 (createdAt 사용)
+        for (KnowledgePost post : knowledgePosts) {
+            KnowledgePostResponse response = convertToKnowledgePostResponse(post);
+            allPostsWithTime.add(new PostWithTime(response, post.getCreatedAt()));
+        }
+        
+        // QuizPost 변환 (createdAt 사용)
+        for (QuizPost quiz : quizPosts) {
+            KnowledgePostResponse response = convertQuizToKnowledgePostResponse(quiz);
+            allPostsWithTime.add(new PostWithTime(response, quiz.getCreatedAt()));
+        }
+        
+        // LocalDateTime으로 정렬 후 응답 객체만 반환 (초 단위까지 정확한 정렬)
+        return allPostsWithTime.stream()
+                .sorted((a, b) -> b.createdTime.compareTo(a.createdTime)) // 최신순
+                .map(item -> item.response)
                 .collect(Collectors.toList());
     }
 
@@ -145,6 +184,22 @@ public class UserService {
                 post.getContent(),
                 post.getAuthor().getNickname(),
                 post.getPublishDate().toString(),
+                imageUrls
+        );
+    }
+    
+    private KnowledgePostResponse convertQuizToKnowledgePostResponse(QuizPost quiz) {
+        List<String> imageUrls = new ArrayList<>();
+        if (quiz.getImageUrl() != null && !quiz.getImageUrl().isEmpty()) {
+            imageUrls.add(quiz.getImageUrl());
+        }
+
+        return new KnowledgePostResponse(
+                quiz.getId(),
+                quiz.getQuestion(), // 퀴즈 질문을 title로 사용
+                "퀴즈: " + quiz.getQuestion(), // content에는 퀴즈임을 표시
+                quiz.getAuthor().getNickname(),
+                quiz.getPublishDate().toString(),
                 imageUrls
         );
     }

@@ -65,6 +65,11 @@ public class PostController {
         return ResponseEntity.ok(knowledgePostService.findById(postId));
     }
 
+    @GetMapping("/detail/{postId}")
+    public ResponseEntity<KnowledgePostResponse> getPostDetail(@PathVariable Long postId) {
+        return ResponseEntity.ok(knowledgePostService.findById(postId));
+    }
+
     @DeleteMapping("/{postId}")
     public ResponseEntity<Void> delete(@PathVariable Long postId) {
         knowledgePostService.delete(postId);

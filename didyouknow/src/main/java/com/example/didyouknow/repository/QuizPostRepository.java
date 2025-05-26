@@ -8,5 +8,5 @@ import java.util.List;
 
 // QuizPost
 public interface QuizPostRepository extends JpaRepository<QuizPost, Long> {
-    List<QuizPost> findByAuthor(User author);
+    List<QuizPost> findByAuthorOrderByCreatedAtDesc(User author);
 }
