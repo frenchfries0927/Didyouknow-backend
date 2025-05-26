@@ -1,5 +1,6 @@
 package com.example.didyouknow.controller;
 
+import com.example.didyouknow.common.ApiResponse;
 import com.example.didyouknow.dto.user.ProfileRequest;
 import com.example.didyouknow.dto.user.UserProfileResponse;
 import com.example.didyouknow.dto.post.KnowledgePostResponse;
@@ -22,12 +23,20 @@ public class UserController {
     private UserService userService;
 
     @PatchMapping("/me/complete-profile")
-    public ResponseEntity<?> completeProfile(@RequestBody ProfileRequest request,
-                                             @AuthenticationPrincipal Long userId) {
+    public ResponseEntity<ApiResponse<Void>> completeProfile(@RequestBody ProfileRequest request,
+                                                             @AuthenticationPrincipal Long userId) {
         System.out.println(request.toString());
         userService.completeProfile(userId, request);
-        return ResponseEntity.ok().build();
+
+        ApiResponse<Void> response = ApiResponse.<Void>builder()
+                .code(200)
+                .message("프로필 등록 완료")
+                .data(null)
+                .build();
+
+        return ResponseEntity.ok(response);
     }
+
 
     @GetMapping("/me/profile")
     public ResponseEntity<UserProfileResponse> getMyProfile(@AuthenticationPrincipal Long userId) {
