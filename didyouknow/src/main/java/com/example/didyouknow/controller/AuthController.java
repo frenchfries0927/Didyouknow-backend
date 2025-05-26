@@ -4,6 +4,7 @@ import com.example.didyouknow.auth.JwtProvider;
 import com.example.didyouknow.common.ApiResponse;
 import com.example.didyouknow.service.AuthService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -43,4 +44,18 @@ public class AuthController {
 
         return isValid ? ResponseEntity.ok(response) : ResponseEntity.status(401).body(response);
     }
+
+    @PostMapping("/auth/reissue")
+    public ResponseEntity<ApiResponse<Map<String, String>>> reissue(@RequestBody Map<String, String> request) {
+        String refreshToken = request.get("refreshToken");
+        Map<String, String> tokenResponse = authService.reissueAccessToken(refreshToken);
+
+        if (tokenResponse == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(ApiResponse.of(401, "Invalid refresh token", null));
+        }
+
+        return ResponseEntity.ok(ApiResponse.of(200, "재발급 성공", tokenResponse));
+    }
+
 }

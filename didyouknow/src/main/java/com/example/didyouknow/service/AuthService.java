@@ -1,12 +1,17 @@
 package com.example.didyouknow.service;
 
 import com.example.didyouknow.auth.JwtProvider;
+import com.example.didyouknow.common.ApiResponse;
 import com.example.didyouknow.domain.User;
 import com.example.didyouknow.dto.user.GoogleUserInfo;
 import com.example.didyouknow.dto.user.UserResponse;
 import com.example.didyouknow.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.time.LocalDateTime;
 import java.util.Map;
@@ -41,6 +46,7 @@ public class AuthService {
 
         // 3. JWT 발급
         String jwt = jwtProvider.generateToken(user.getId(), user.getEmail(), user.getRole(), user.getStatus());
+        String refreshToken = jwtProvider.generateRefreshToken(user.getId(), user.getEmail(), user.getRole());
 
         // 4. 유저 정보 DTO 가공
         UserResponse userResponse = UserResponse.builder()
@@ -54,6 +60,7 @@ public class AuthService {
         // 5. 응답 반환
         return Map.of(
                 "token", jwt,
+                "refreshToken", refreshToken,
                 "user", userResponse,
                 "requiresProfile", user.getStatus().equals("REGISTERED")
         );
@@ -61,5 +68,20 @@ public class AuthService {
 
     public boolean verifyToken(String token) {
         return jwtProvider.validateToken(token);
+    }
+
+    public Map<String, String> reissueAccessToken(String refreshToken) {
+        if (!jwtProvider.validateToken(refreshToken)) {
+            return null;
+        }
+
+        Long userId = jwtProvider.getUserIdFromToken(refreshToken);
+        String email = jwtProvider.getEmailFromToken(refreshToken);
+        String role = jwtProvider.getClaims(refreshToken).get("role", String.class);
+        String status = jwtProvider.getClaims(refreshToken).get("status", String.class);
+
+        String newAccessToken = jwtProvider.generateToken(userId, email, role, status);
+
+        return Map.of("accessToken", newAccessToken);
     }
 }

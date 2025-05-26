@@ -21,6 +21,7 @@ public class JwtProvider {
     private Key secretKey;
 
     private static final long ACCESS_TOKEN_VALIDITY = 1000 * 60 * 60; // 1시간
+    private static final long REFRESH_TOKEN_VALIDITY = 1000L * 60 * 60 * 24 * 7; //일주일
 
     @PostConstruct
     public void init() {
@@ -40,6 +41,17 @@ public class JwtProvider {
                 .compact();
     }
 
+    public String generateRefreshToken(Long userId, String email, String role) {
+        return Jwts.builder()
+                .setSubject(email)
+                .claim("userId", userId)
+                .claim("role", role)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + REFRESH_TOKEN_VALIDITY))
+                .signWith(secretKey, SignatureAlgorithm.HS256)
+                .compact();
+    }
+
 
     // JWT 유효성 검사
     public boolean validateToken(String token) {
@@ -55,7 +67,7 @@ public class JwtProvider {
     }
 
     // Claims 추출
-    private Claims getClaims(String token) {
+    public Claims getClaims(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(secretKey)
                 .build()
