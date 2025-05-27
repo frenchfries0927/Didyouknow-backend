@@ -50,14 +50,14 @@ public class UserController {
     }
 
     @GetMapping("/{targetUserId}/profile")
-    public ResponseEntity<UserProfileResponse> getUserProfile(@PathVariable Long targetUserId) {
+    public ResponseEntity<ApiResponse<UserProfileResponse>> getUserProfile(@PathVariable Long targetUserId) {
         UserProfileResponse profile = userService.getUserProfile(targetUserId);
-        return ResponseEntity.ok(profile);
+        return ApiResponseHelper.success(profile);
     }
 
     @GetMapping("/{targetUserId}/posts")
-    public ResponseEntity<List<KnowledgePostResponse>> getUserPosts(@PathVariable Long targetUserId) {
+    public ResponseEntity<ApiResponse<List<KnowledgePostResponse>>> getUserPosts(@PathVariable Long targetUserId) {
         List<KnowledgePostResponse> posts = userService.getUserPosts(targetUserId);
-        return ResponseEntity.ok(posts);
+        return ApiResponseHelper.success(posts);
     }
 }
