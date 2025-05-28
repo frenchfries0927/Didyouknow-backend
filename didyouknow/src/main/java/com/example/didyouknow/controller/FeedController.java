@@ -1,6 +1,7 @@
 package com.example.didyouknow.controller;
 
 
+import com.example.didyouknow.common.ApiResponse;
 import com.example.didyouknow.dto.feed.FeedResponse;
 import com.example.didyouknow.service.FeedService;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +20,9 @@ public class FeedController {
     private final FeedService feedService;
 
     @GetMapping
-    public ResponseEntity<List<FeedResponse>> getFeed() {
-        return ResponseEntity.ok(feedService.getFeed());
+    public ResponseEntity<ApiResponse<List<FeedResponse>>> getFeed() {
+        List<FeedResponse> feedList = feedService.getFeed();
+        ApiResponse<List<FeedResponse>> response = ApiResponse.of(200, "success", feedList);
+        return ResponseEntity.ok(response);
     }
 }
