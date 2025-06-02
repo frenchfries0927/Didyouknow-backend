@@ -71,12 +71,13 @@ public class QuizController {
     }
 
     @GetMapping("/{quizId}")
-    public ResponseEntity<ApiResponse<QuizPostResponse>> findById(@PathVariable Long quizId) {
-        return ApiResponseHelper.success(quizPostService.findById(quizId));
+    public ResponseEntity<ApiResponse<QuizPostResponse>> findById(@PathVariable("quizId") Long quizId) {
+        QuizPostResponse quiz = quizPostService.findById(quizId);
+        return ApiResponseHelper.success(quiz);
     }
 
     @DeleteMapping("/{quizId}")
-    public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Long quizId) {
+    public ResponseEntity<ApiResponse<Void>> delete(@PathVariable("quizId") Long quizId) {
         quizPostService.delete(quizId);
         return ApiResponseHelper.success(null);
     }

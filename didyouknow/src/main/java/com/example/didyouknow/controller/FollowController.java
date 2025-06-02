@@ -1,5 +1,7 @@
 package com.example.didyouknow.controller;
 
+import com.example.didyouknow.common.ApiResponse;
+import com.example.didyouknow.common.ApiResponseHelper;
 import com.example.didyouknow.dto.follow.FollowResponse;
 import com.example.didyouknow.service.FollowService;
 import lombok.RequiredArgsConstructor;
@@ -17,43 +19,43 @@ public class FollowController {
     private final FollowService followService;
 
     @PostMapping("/{targetUserId}")
-    public ResponseEntity<Void> follow(@AuthenticationPrincipal Long userId,
+    public ResponseEntity<ApiResponse<Void>> follow(@AuthenticationPrincipal Long userId,
                                        @PathVariable("targetUserId") Long targetUserId) {
         followService.follow(userId, targetUserId);
-        return ResponseEntity.ok().build();
+        return ApiResponseHelper.success(null);
     }
 
     @DeleteMapping("/{targetUserId}")
-    public ResponseEntity<Void> unfollow(@AuthenticationPrincipal Long userId,
+    public ResponseEntity<ApiResponse<Void>> unfollow(@AuthenticationPrincipal Long userId,
                                          @PathVariable("targetUserId") Long targetUserId) {
         followService.unfollow(userId, targetUserId);
-        return ResponseEntity.noContent().build();
+        return ApiResponseHelper.success(null);
     }
 
-    @GetMapping("/me/following")
-    public ResponseEntity<List<FollowResponse>> getMyFollowing(@AuthenticationPrincipal Long userId) {
-        return ResponseEntity.ok(followService.getFollowing(userId));
+    @GetMapping("/followers")
+    public ResponseEntity<ApiResponse<List<FollowResponse>>> getMyFollowers(@AuthenticationPrincipal Long userId) {
+        return ApiResponseHelper.success(followService.getFollowers(userId));
     }
 
-    @GetMapping("/me/followers")
-    public ResponseEntity<List<FollowResponse>> getMyFollowers(@AuthenticationPrincipal Long userId) {
-        return ResponseEntity.ok(followService.getFollowers(userId));
+    @GetMapping("/following")
+    public ResponseEntity<ApiResponse<List<FollowResponse>>> getMyFollowing(@AuthenticationPrincipal Long userId) {
+        return ApiResponseHelper.success(followService.getFollowing(userId));
     }
 
     @GetMapping("/{targetUserId}/following")
-    public ResponseEntity<List<FollowResponse>> getUserFollowing(@PathVariable("targetUserId") Long targetUserId) {
-        return ResponseEntity.ok(followService.getFollowing(targetUserId));
+    public ResponseEntity<ApiResponse<List<FollowResponse>>> getUserFollowing(@PathVariable("targetUserId") Long targetUserId) {
+        return ApiResponseHelper.success(followService.getFollowing(targetUserId));
     }
 
     @GetMapping("/{targetUserId}/followers")
-    public ResponseEntity<List<FollowResponse>> getUserFollowers(@PathVariable("targetUserId") Long targetUserId) {
-        return ResponseEntity.ok(followService.getFollowers(targetUserId));
+    public ResponseEntity<ApiResponse<List<FollowResponse>>> getUserFollowers(@PathVariable("targetUserId") Long targetUserId) {
+        return ApiResponseHelper.success(followService.getFollowers(targetUserId));
     }
 
     @GetMapping("/check/{targetUserId}")
-    public ResponseEntity<Boolean> checkFollowStatus(@AuthenticationPrincipal Long userId,
+    public ResponseEntity<ApiResponse<Boolean>> checkFollowStatus(@AuthenticationPrincipal Long userId,
                                                      @PathVariable("targetUserId") Long targetUserId) {
         boolean isFollowing = followService.isFollowing(userId, targetUserId);
-        return ResponseEntity.ok(isFollowing);
+        return ApiResponseHelper.success(isFollowing);
     }
 }

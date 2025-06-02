@@ -6,6 +6,8 @@ import com.example.didyouknow.domain.QuizPost;
 import com.example.didyouknow.dto.feed.FeedResponse;
 import com.example.didyouknow.repository.KnowledgePostRepository;
 import com.example.didyouknow.repository.QuizPostRepository;
+import com.example.didyouknow.repository.LikeRepository;
+import com.example.didyouknow.repository.CommentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -18,8 +20,14 @@ import java.util.List;
 public class FeedService {
     private final KnowledgePostRepository knowledgePostRepository;
     private final QuizPostRepository quizPostRepository;
+    private final LikeRepository likeRepository;
+    private final CommentRepository commentRepository;
 
     public List<FeedResponse> getFeed() {
+        return getFeedForUser(null); // 비로그인 사용자용
+    }
+    
+    public List<FeedResponse> getFeedForUser(Long userId) {
         List<FeedResponse> feeds = new ArrayList<>();
 
         // 1. KnowledgePost → FeedResponse
@@ -39,20 +47,29 @@ public class FeedService {
                 }
             }
 
+            // 좋아요 및 댓글 개수 조회
+            Long likesCount = likeRepository.countByTargetTypeAndTargetId("knowledge", post.getId());
+            Long commentsCount = commentRepository.countByTargetTypeAndTargetId("knowledge", post.getId());
+            Boolean isLiked = userId != null ? likeRepository.isLikedByUser(userId, "knowledge", post.getId()) : false;
+
             feeds.add(new FeedResponse(
                     post.getId(),
                     "knowledge",
                     post.getTitle(),
                     post.getContent(),
                     imageUrl,  // 첫 번째 이미지 URL 사용
+                    post.getAuthor().getId(),
                     post.getAuthor().getNickname(),
                     post.getAuthor().getProfileImageUrl(),
                     post.getCreatedAt(),
-                    null  // options 없음
+                    null,  // options 없음
+                    likesCount,
+                    commentsCount,
+                    isLiked
             ));
         }
 
-        // 2. QuizPost → FeedResponse (변경 없음)
+        // 2. QuizPost → FeedResponse
         List<QuizPost> quizPosts = quizPostRepository.findAll();
         for (QuizPost post : quizPosts) {
             List<String> options = List.of(
@@ -62,16 +79,25 @@ public class FeedService {
                     post.getOption4()
             );
 
+            // 좋아요 및 댓글 개수 조회
+            Long likesCount = likeRepository.countByTargetTypeAndTargetId("quiz", post.getId());
+            Long commentsCount = commentRepository.countByTargetTypeAndTargetId("quiz", post.getId());
+            Boolean isLiked = userId != null ? likeRepository.isLikedByUser(userId, "quiz", post.getId()) : false;
+
             feeds.add(new FeedResponse(
                     post.getId(),
                     "quiz",
                     post.getQuestion(),
                     "정답: 옵션 " + post.getCorrectOption(),
                     post.getImageUrl(),
+                    post.getAuthor().getId(),
                     post.getAuthor().getNickname(),
                     post.getAuthor().getProfileImageUrl(),
                     post.getCreatedAt(),
-                    options
+                    options,
+                    likesCount,
+                    commentsCount,
+                    isLiked
             ));
         }
 
