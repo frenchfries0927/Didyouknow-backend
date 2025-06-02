@@ -65,17 +65,18 @@ public class PostController {
     }
 
     @GetMapping("/{postId}")
-    public ResponseEntity<ApiResponse<KnowledgePostResponse>> findById(@PathVariable Long postId) {
-        return ApiResponseHelper.success(knowledgePostService.findById(postId));
+    public ResponseEntity<ApiResponse<KnowledgePostResponse>> findById(@PathVariable("postId") Long postId) {
+        KnowledgePostResponse post = knowledgePostService.findById(postId);
+        return ApiResponseHelper.success(post);
     }
 
-    @GetMapping("/detail/{postId}")
-    public ResponseEntity<KnowledgePostResponse> getPostDetail(@PathVariable Long postId) {
+    @GetMapping("/{postId}/detail")
+    public ResponseEntity<KnowledgePostResponse> getPostDetail(@PathVariable("postId") Long postId) {
         return ResponseEntity.ok(knowledgePostService.findById(postId));
     }
 
     @DeleteMapping("/{postId}")
-    public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Long postId) {
+    public ResponseEntity<ApiResponse<Void>> delete(@PathVariable("postId") Long postId) {
         knowledgePostService.delete(postId);
         return ApiResponseHelper.success(null);
     }

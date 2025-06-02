@@ -45,6 +45,7 @@ public class FeedService {
                     post.getTitle(),
                     post.getContent(),
                     imageUrl,  // 첫 번째 이미지 URL 사용
+                    post.getAuthor().getId(),
                     post.getAuthor().getNickname(),
                     post.getAuthor().getProfileImageUrl(),
                     post.getCreatedAt(),
@@ -68,6 +69,7 @@ public class FeedService {
                     post.getQuestion(),
                     "정답: 옵션 " + post.getCorrectOption(),
                     post.getImageUrl(),
+                    post.getAuthor().getId(),
                     post.getAuthor().getNickname(),
                     post.getAuthor().getProfileImageUrl(),
                     post.getCreatedAt(),

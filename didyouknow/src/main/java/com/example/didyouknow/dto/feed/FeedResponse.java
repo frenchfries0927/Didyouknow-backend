@@ -13,6 +13,7 @@ public class FeedResponse {
     private String title;
     private String content;
     private String imageUrl;
+    private Long authorId;
     private String author;
     private String profileImageUrl;
     private LocalDateTime createdAt;
