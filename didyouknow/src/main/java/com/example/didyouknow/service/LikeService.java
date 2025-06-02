@@ -7,9 +7,11 @@ import com.example.didyouknow.repository.LikeRepository;
 import com.example.didyouknow.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -38,6 +40,32 @@ public class LikeService {
         likeRepository.deleteByUserAndTargetId(user, targetId);
     }
 
+    @Transactional
+    public boolean toggleLike(Long userId, String targetType, Long targetId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("유저를 찾을 수 없습니다."));
+        
+        Optional<Like> existingLike = likeRepository.findByUserAndTargetTypeAndTargetId(user, targetType, targetId);
+        
+        if (existingLike.isPresent()) {
+            // 좋아요가 이미 있으면 제거
+            likeRepository.delete(existingLike.get());
+            return false;
+        } else {
+            // 좋아요가 없으면 추가
+            Like like = new Like();
+            like.setUser(user);
+            like.setTargetType(targetType);
+            like.setTargetId(targetId);
+            like.setCreatedAt(LocalDateTime.now());
+            likeRepository.save(like);
+            return true;
+        }
+    }
+    
+    public Long getLikeCount(String targetType, Long targetId) {
+        return likeRepository.countByTargetTypeAndTargetId(targetType, targetId);
+    }
 
     public List<LikeResponse> getMyLikes(Long userId) {
         User user = userRepository.findById(userId).orElseThrow();

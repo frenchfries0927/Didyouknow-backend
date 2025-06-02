@@ -20,8 +20,8 @@ public class FeedController {
     private final FeedService feedService;
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<FeedResponse>>> getFeed() {
-        List<FeedResponse> feedList = feedService.getFeed();
+    public ResponseEntity<ApiResponse<List<FeedResponse>>> getFeed(@RequestParam(value = "userId", required = false) Long userId) {
+        List<FeedResponse> feedList = feedService.getFeedForUser(userId);
         ApiResponse<List<FeedResponse>> response = ApiResponse.of(200, "success", feedList);
         return ResponseEntity.ok(response);
     }
