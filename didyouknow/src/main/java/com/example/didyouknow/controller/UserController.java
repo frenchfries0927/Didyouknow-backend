@@ -25,7 +25,7 @@ public class UserController {
 
     @PatchMapping("/me/complete-profile")
     public ResponseEntity<ApiResponse<Void>> completeProfile(@RequestBody ProfileRequest request,
-                                                             @AuthenticationPrincipal Long userId) {
+                                             @AuthenticationPrincipal Long userId) {
         userService.completeProfile(userId, request);
         return ApiResponseHelper.success(null);
     }
