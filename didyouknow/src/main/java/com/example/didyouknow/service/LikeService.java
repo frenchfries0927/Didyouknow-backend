@@ -41,15 +41,17 @@ public class LikeService {
     }
 
     @Transactional
-    public boolean toggleLike(Long userId, String targetType, Long targetId) {
+    public synchronized boolean toggleLike(Long userId, String targetType, Long targetId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("유저를 찾을 수 없습니다."));
         
+        // 트랜잭션 내에서 다시 한번 체크
         Optional<Like> existingLike = likeRepository.findByUserAndTargetTypeAndTargetId(user, targetType, targetId);
         
         if (existingLike.isPresent()) {
             // 좋아요가 이미 있으면 제거
             likeRepository.delete(existingLike.get());
+            likeRepository.flush(); // 즉시 DB에 반영
             return false;
         } else {
             // 좋아요가 없으면 추가
@@ -59,6 +61,7 @@ public class LikeService {
             like.setTargetId(targetId);
             like.setCreatedAt(LocalDateTime.now());
             likeRepository.save(like);
+            likeRepository.flush(); // 즉시 DB에 반영
             return true;
         }
     }
