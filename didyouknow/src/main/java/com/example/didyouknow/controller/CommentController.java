@@ -42,4 +42,12 @@ public class CommentController {
         commentService.delete(commentId);
         return ApiResponseHelper.success(null);
     }
+
+    // 댓글 개수 조회
+    @GetMapping("/count")
+    public ResponseEntity<ApiResponse<Long>> getCommentCount(@RequestParam("targetType") String targetType,
+                                                           @RequestParam("targetId") Long targetId) {
+        Long count = commentService.getCommentCount(targetType, targetId);
+        return ApiResponseHelper.success(count);
+    }
 }

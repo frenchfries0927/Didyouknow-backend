@@ -93,4 +93,8 @@ public class CommentService {
     public void delete(Long commentId) {
         commentRepository.deleteById(commentId);
     }
+    
+    public Long getCommentCount(String targetType, Long targetId) {
+        return commentRepository.countByTargetTypeAndTargetId(targetType, targetId);
+    }
 }
