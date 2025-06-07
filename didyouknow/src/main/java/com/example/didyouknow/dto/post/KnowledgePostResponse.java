@@ -9,9 +9,13 @@ import java.util.List;
 @AllArgsConstructor
 public class KnowledgePostResponse {
     private Long id;
+    private String type;
     private String title;
     private String content;
     private String authorNickname;
     private String publishDate;
     private List<String> imageUrls;
+    private Long likes;
+    private Long comments;
+    private Boolean isLiked;
 }

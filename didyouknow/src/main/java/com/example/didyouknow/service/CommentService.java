@@ -44,9 +44,11 @@ public class CommentService {
                 saved.getContent(),
                 saved.getUser().getNickname(),
                 saved.getUser().getId(),
+                saved.getUser().getProfileImageUrl() != null ? saved.getUser().getProfileImageUrl() : "",
                 saved.getCreatedAt().toString(),
                 saved.getParentComment() != null ? saved.getParentComment().getId() : null,
-                List.of() // 새로 생성된 댓글은 대댓글이 없음
+                0,
+                List.of()
         );
     }
 
@@ -73,9 +75,11 @@ public class CommentService {
                         reply.getContent(),
                         reply.getUser().getNickname(),
                         reply.getUser().getId(),
+                        reply.getUser().getProfileImageUrl() != null ? reply.getUser().getProfileImageUrl() : "",
                         reply.getCreatedAt().toString(),
                         reply.getParentComment().getId(),
-                        List.of() // 대댓글의 대댓글은 현재 지원하지 않음
+                        0,
+                        List.of()
                 ))
                 .collect(Collectors.toList());
         
@@ -84,8 +88,10 @@ public class CommentService {
                 comment.getContent(),
                 comment.getUser().getNickname(),
                 comment.getUser().getId(),
+                comment.getUser().getProfileImageUrl() != null ? comment.getUser().getProfileImageUrl() : "",
                 comment.getCreatedAt().toString(),
                 comment.getParentComment() != null ? comment.getParentComment().getId() : null,
+                0,
                 replies
         );
     }

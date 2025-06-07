@@ -14,6 +14,8 @@ import com.example.didyouknow.repository.KnowledgePostRepository;
 import com.example.didyouknow.repository.QuizPostRepository;
 import com.example.didyouknow.repository.FollowRepository;
 import com.example.didyouknow.repository.UserBadgeRepository;
+import com.example.didyouknow.repository.LikeRepository;
+import com.example.didyouknow.repository.CommentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -33,6 +35,8 @@ public class UserService {
     private final QuizPostRepository quizPostRepository;
     private final FollowRepository followRepository;
     private final UserBadgeRepository userBadgeRepository;
+    private final LikeRepository likeRepository;
+    private final CommentRepository commentRepository;
 
     public UserResponse signup(SignupRequest request) {
         // 이메일 중복 + 같은 providerId가 있을 경우 중복 가입 방지
@@ -134,13 +138,13 @@ public class UserService {
         
         // KnowledgePost 변환 (createdAt 사용)
         for (KnowledgePost post : knowledgePosts) {
-            KnowledgePostResponse response = convertToKnowledgePostResponse(post);
+            KnowledgePostResponse response = convertToKnowledgePostResponse(post, userId);
             allPostsWithTime.add(new PostWithTime(response, post.getCreatedAt()));
         }
         
         // QuizPost 변환 (createdAt 사용)
         for (QuizPost quiz : quizPosts) {
-            KnowledgePostResponse response = convertQuizToKnowledgePostResponse(quiz);
+            KnowledgePostResponse response = convertQuizToKnowledgePostResponse(quiz, userId);
             allPostsWithTime.add(new PostWithTime(response, quiz.getCreatedAt()));
         }
         
@@ -173,34 +177,50 @@ public class UserService {
                 .collect(Collectors.toList());
     }
 
-    private KnowledgePostResponse convertToKnowledgePostResponse(KnowledgePost post) {
+    private KnowledgePostResponse convertToKnowledgePostResponse(KnowledgePost post, Long userId) {
         List<String> imageUrls = post.getImages().stream()
                 .map(image -> image.getImageUrl())
                 .collect(Collectors.toList());
 
+        // 좋아요와 댓글 정보 조회
+        Long likesCount = likeRepository.countByTargetTypeAndTargetId("knowledge", post.getId());
+        Long commentsCount = commentRepository.countByTargetTypeAndTargetId("knowledge", post.getId());
+
         return new KnowledgePostResponse(
                 post.getId(),
+                "knowledge",
                 post.getTitle(),
                 post.getContent(),
                 post.getAuthor().getNickname(),
                 post.getPublishDate().toString(),
-                imageUrls
+                imageUrls,
+                likesCount,
+                commentsCount,
+                false // 기본값으로 false 설정 (사용자별 좋아요 상태는 별도 처리 필요시)
         );
     }
     
-    private KnowledgePostResponse convertQuizToKnowledgePostResponse(QuizPost quiz) {
+    private KnowledgePostResponse convertQuizToKnowledgePostResponse(QuizPost quiz, Long userId) {
         List<String> imageUrls = new ArrayList<>();
         if (quiz.getImageUrl() != null && !quiz.getImageUrl().isEmpty()) {
             imageUrls.add(quiz.getImageUrl());
         }
 
+        // 좋아요와 댓글 정보 조회
+        Long likesCount = likeRepository.countByTargetTypeAndTargetId("quiz", quiz.getId());
+        Long commentsCount = commentRepository.countByTargetTypeAndTargetId("quiz", quiz.getId());
+
         return new KnowledgePostResponse(
                 quiz.getId(),
+                "quiz",
                 quiz.getQuestion(), // 퀴즈 질문을 title로 사용
                 "퀴즈: " + quiz.getQuestion(), // content에는 퀴즈임을 표시
                 quiz.getAuthor().getNickname(),
                 quiz.getPublishDate().toString(),
-                imageUrls
+                imageUrls,
+                likesCount,
+                commentsCount,
+                false // 기본값으로 false 설정
         );
     }
 }

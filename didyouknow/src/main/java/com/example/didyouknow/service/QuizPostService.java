@@ -7,6 +7,8 @@ import com.example.didyouknow.dto.quiz.QuizPostRequest;
 import com.example.didyouknow.dto.quiz.QuizPostResponse;
 import com.example.didyouknow.repository.QuizPostRepository;
 import com.example.didyouknow.repository.UserRepository;
+import com.example.didyouknow.repository.LikeRepository;
+import com.example.didyouknow.repository.CommentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,6 +26,8 @@ public class QuizPostService {
 
     private final QuizPostRepository quizPostRepository;
     private final UserRepository userRepository;
+    private final LikeRepository likeRepository;
+    private final CommentRepository commentRepository;
 
     @Transactional
     public QuizPostResponse create(Long authorId, QuizPostRequest request, List<String> imageUrls) {
@@ -94,13 +98,20 @@ public class QuizPostService {
             imageUrls.add(quiz.getImageUrl());
         }
 
+        // 좋아요와 댓글 정보 조회
+        Long likesCount = likeRepository.countByTargetTypeAndTargetId("quiz", quiz.getId());
+        Long commentsCount = commentRepository.countByTargetTypeAndTargetId("quiz", quiz.getId());
+
         return new QuizPostResponse(
                 quiz.getId(),
                 quiz.getQuestion(),
                 new String[]{quiz.getOption1(), quiz.getOption2(), quiz.getOption3(), quiz.getOption4()},
                 quiz.getAuthor().getNickname(),
                 quiz.getPublishDate().toString(),
-                imageUrls
+                imageUrls,
+                likesCount,
+                commentsCount,
+                false // 기본값으로 false 설정
         );
     }
 }

@@ -7,6 +7,8 @@ import com.example.didyouknow.dto.post.KnowledgePostRequest;
 import com.example.didyouknow.dto.post.KnowledgePostResponse;
 import com.example.didyouknow.repository.KnowledgePostRepository;
 import com.example.didyouknow.repository.UserRepository;
+import com.example.didyouknow.repository.LikeRepository;
+import com.example.didyouknow.repository.CommentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,6 +26,8 @@ public class KnowledgePostService {
 
     private final KnowledgePostRepository knowledgePostRepository;
     private final UserRepository userRepository;
+    private final LikeRepository likeRepository;
+    private final CommentRepository commentRepository;
 
     @Transactional
     public KnowledgePostResponse create(Long authorId, KnowledgePostRequest request, List<String> imageUrls) {
@@ -80,13 +84,21 @@ public class KnowledgePostService {
                 .map(PostImage::getImageUrl)
                 .collect(Collectors.toList());
 
+        // 좋아요와 댓글 정보 조회
+        Long likesCount = likeRepository.countByTargetTypeAndTargetId("knowledge", post.getId());
+        Long commentsCount = commentRepository.countByTargetTypeAndTargetId("knowledge", post.getId());
+
         return new KnowledgePostResponse(
                 post.getId(),
+                "knowledge",
                 post.getTitle(),
                 post.getContent(),
                 post.getAuthor().getNickname(),
                 post.getPublishDate().toString(),
-                imageUrls
+                imageUrls,
+                likesCount,
+                commentsCount,
+                false // 기본값으로 false 설정
         );
     }
 }

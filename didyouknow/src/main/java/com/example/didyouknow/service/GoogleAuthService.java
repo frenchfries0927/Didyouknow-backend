@@ -31,6 +31,7 @@ public class GoogleAuthService {
             GoogleIdToken.Payload payload = idToken.getPayload();
 
             return GoogleUserInfo.builder()
+                    .sub(payload.getSubject())
                     .email(payload.getEmail())
                     .name((String) payload.get("name"))
                     .picture((String) payload.get("picture"))

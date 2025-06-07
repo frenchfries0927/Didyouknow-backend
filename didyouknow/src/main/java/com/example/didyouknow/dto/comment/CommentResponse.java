@@ -10,9 +10,11 @@ import java.util.List;
 public class CommentResponse {
     private Long id;
     private String content;
-    private String writerNickname;
+    private String author;
     private Long authorId;
+    private String profileImageUrl;
     private String createdAt;
     private Long parentCommentId;
+    private int likes;
     private List<CommentResponse> replies;
 }

@@ -32,7 +32,9 @@ public class CommentController {
     @GetMapping("/target")
     public ResponseEntity<ApiResponse<List<CommentResponse>>> getByTarget(@RequestParam("targetType") String targetType,
                                                              @RequestParam("targetId") Long targetId) {
+        System.out.println("댓글 조회 요청 - targetType: " + targetType + ", targetId: " + targetId);
         List<CommentResponse> comments = commentService.findByTarget(targetType, targetId);
+        System.out.println("댓글 조회 결과 - 댓글 수: " + comments.size());
         return ApiResponseHelper.success(comments);
     }
 

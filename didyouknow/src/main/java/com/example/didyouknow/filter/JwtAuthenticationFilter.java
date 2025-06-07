@@ -28,22 +28,32 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
 
         String authHeader = request.getHeader("Authorization");
-        System.out.println(authHeader);
+        System.out.println("Authorization Header: " + authHeader);
 
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             String token = authHeader.replace("Bearer ", "");
+            System.out.println("JWT Token: " + token.substring(0, Math.min(50, token.length())) + "...");
 
             if (jwtProvider.validateToken(token)) {
-                Long userId = jwtProvider.getUserIdFromToken(token); // 필요시 구현
+                System.out.println("Token is valid");
+                Long userId = jwtProvider.getUserIdFromToken(token);
+                System.out.println("Extracted userId: " + userId);
 
-
-                // 스프링 인증 객체 생성
-                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                        userId, null, List.of(new SimpleGrantedAuthority("ROLE_USER"))
-                );
-
-                SecurityContextHolder.getContext().setAuthentication(authentication);
+                if (userId != null) {
+                    // 스프링 인증 객체 생성
+                    UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                            userId, null, List.of(new SimpleGrantedAuthority("ROLE_USER"))
+                    );
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                    System.out.println("Authentication set for userId: " + userId);
+                } else {
+                    System.out.println("ERROR: userId is null after extraction");
+                }
+            } else {
+                System.out.println("Token is invalid");
             }
+        } else {
+            System.out.println("No Authorization header or doesn't start with Bearer");
         }
 
         filterChain.doFilter(request, response);
