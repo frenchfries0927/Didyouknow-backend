@@ -1,5 +1,6 @@
 package com.example.didyouknow.controller;
 
+import com.example.didyouknow.auth.CustomUserDetails;
 import com.example.didyouknow.common.ApiResponse;
 import com.example.didyouknow.common.ApiResponseHelper;
 import com.example.didyouknow.common.ResponseCode;
@@ -10,6 +11,7 @@ import com.example.didyouknow.service.QuizPostService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -26,7 +28,7 @@ public class QuizController {
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ApiResponse<QuizPostResponse>> create(
-            @RequestParam("userId") Long userId,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestParam("question") String question,
             @RequestParam("option1") String option1,
             @RequestParam("option2") String option2,
@@ -55,7 +57,7 @@ public class QuizController {
                     }
                 }
             }
-
+            long userId = userDetails.getUserId();
             QuizPostResponse response = quizPostService.create(userId, request, imageUrls);
             return ApiResponseHelper.success(response);
 

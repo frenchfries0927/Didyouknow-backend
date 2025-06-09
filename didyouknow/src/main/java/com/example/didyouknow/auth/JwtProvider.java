@@ -33,6 +33,7 @@ public class JwtProvider {
         return Jwts.builder()
                 .setSubject(email)
                 .claim("userId", userId)
+                .claim("email", email)
                 .claim("role", role)
                 .claim("status", status) // ex. "REGISTERED" or "ACTIVE"
                 .setIssuedAt(new Date())
@@ -83,7 +84,11 @@ public class JwtProvider {
         return getClaims(token).get("userId", Long.class);
     }
 
-    public String getNameFromToken(String token) {
-        return getClaims(token).get("name", String.class);
+    public String getRoleFromToken(String token) {
+        return getClaims(token).get("role", String.class);
+    }
+
+    public String getStatusFromToken(String token) {
+        return getClaims(token).get("status", String.class);
     }
 }
