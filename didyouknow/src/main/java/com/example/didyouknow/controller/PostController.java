@@ -1,5 +1,6 @@
 package com.example.didyouknow.controller;
 
+import com.example.didyouknow.auth.CustomUserDetails;
 import com.example.didyouknow.common.ApiResponse;
 import com.example.didyouknow.common.ApiResponseHelper;
 import com.example.didyouknow.dto.post.KnowledgePostRequest;
@@ -13,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -33,7 +35,7 @@ public class PostController {
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ApiResponse<KnowledgePostResponse>> create(
-            @RequestParam("userId") Long userId,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestParam("title") String title,
             @RequestParam("content") String content,
             @RequestParam(value = "publishDate", required = false, defaultValue = "2025-01-01") String publishDate,
@@ -55,6 +57,7 @@ public class PostController {
             request.setContent(content);
             request.setPublishDate(publishDate);
 
+            long userId = userDetails.getUserId();
             KnowledgePostResponse response = knowledgePostService.create(userId, request, imageUrls);
             return ApiResponseHelper.success(response);
 
