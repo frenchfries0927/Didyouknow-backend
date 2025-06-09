@@ -130,9 +130,24 @@ public class PostController {
     }
 
     @DeleteMapping("/{postId}")
-    public ResponseEntity<ApiResponse<Void>> delete(@PathVariable("postId") Long postId) {
-        knowledgePostService.delete(postId);
-        return ApiResponseHelper.success(null);
+    public ResponseEntity<ApiResponse<Void>> delete(@PathVariable("postId") Long postId, 
+                                                   @RequestParam("userId") Long userId,
+                                                   @RequestParam("type") String type) {
+        try {
+            if ("knowledge".equals(type)) {
+                knowledgePostService.deleteByUserIdAndPostId(userId, postId);
+            } else if ("quiz".equals(type)) {
+                quizPostService.deleteByUserIdAndPostId(userId, postId);
+            } else {
+                return ApiResponseHelper.error(HttpStatus.BAD_REQUEST, "유효하지 않은 게시물 타입입니다.");
+            }
+            return ApiResponseHelper.success(null);
+        } catch (IllegalArgumentException e) {
+            return ApiResponseHelper.error(HttpStatus.FORBIDDEN, e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ApiResponseHelper.error(HttpStatus.INTERNAL_SERVER_ERROR, "게시물 삭제 중 오류가 발생했습니다: " + e.getMessage());
+        }
     }
 
     // 게시글 공유용 URL 생성 API

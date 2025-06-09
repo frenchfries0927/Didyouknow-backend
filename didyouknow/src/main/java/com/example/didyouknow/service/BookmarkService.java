@@ -9,6 +9,7 @@ import com.example.didyouknow.repository.BookmarkRepository;
 import com.example.didyouknow.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -16,6 +17,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class BookmarkService {
 
     private final BookmarkRepository bookmarkRepository;
@@ -122,7 +124,7 @@ public class BookmarkService {
         boolean exists = bookmarkRepository.existsByUserAndTargetTypeAndTargetId(user, targetType, targetId);
         
         if (exists) {
-            bookmarkRepository.deleteByUserAndTargetId(user, targetId);
+            bookmarkRepository.deleteByUserAndTargetTypeAndTargetId(user, targetType, targetId);
             return false;
         } else {
             Bookmark bookmark = new Bookmark();
