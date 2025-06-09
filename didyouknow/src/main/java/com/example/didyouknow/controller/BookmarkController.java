@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/bookmarks")
@@ -33,5 +34,26 @@ public class BookmarkController {
     @GetMapping("/my")
     public ResponseEntity<List<BookmarkResponse>> myBookmarks(@RequestParam(value = "userId") Long userId) {
         return ResponseEntity.ok(bookmarkService.getMyBookmarks(userId));
+    }
+
+    @GetMapping("/feed")
+    public ResponseEntity<List<Map<String, Object>>> getBookmarkFeed(@RequestParam(value = "userId") Long userId) {
+        return ResponseEntity.ok(bookmarkService.getBookmarkFeed(userId));
+    }
+
+    @PostMapping("/toggle")
+    public ResponseEntity<Map<String, Object>> toggleBookmark(@RequestParam(value = "userId") Long userId,
+                                                             @RequestParam(value = "targetType") String targetType,
+                                                             @RequestParam(value = "targetId") Long targetId) {
+        boolean isBookmarked = bookmarkService.toggleBookmark(userId, targetType, targetId);
+        return ResponseEntity.ok(Map.of("isBookmarked", isBookmarked));
+    }
+
+    @GetMapping("/check")
+    public ResponseEntity<Map<String, Object>> checkBookmark(@RequestParam(value = "userId") Long userId,
+                                                           @RequestParam(value = "targetType") String targetType,
+                                                           @RequestParam(value = "targetId") Long targetId) {
+        boolean isBookmarked = bookmarkService.isBookmarked(userId, targetType, targetId);
+        return ResponseEntity.ok(Map.of("isBookmarked", isBookmarked));
     }
 }
