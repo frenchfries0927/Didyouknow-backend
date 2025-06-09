@@ -134,5 +134,49 @@ public class PostController {
         knowledgePostService.delete(postId);
         return ApiResponseHelper.success(null);
     }
+
+    // 게시글 공유용 URL 생성 API
+    @GetMapping("/{postId}/share")
+    public ResponseEntity<ApiResponse<Map<String, Object>>> getShareUrl(@PathVariable("postId") Long postId) {
+        try {
+            // 먼저 게시글이 존재하는지 확인
+            Map<String, Object> shareData = new HashMap<>();
+            
+            try {
+                // 지식 게시물에서 찾기
+                KnowledgePostResponse knowledgePost = knowledgePostService.findById(postId);
+                shareData.put("id", knowledgePost.getId());
+                shareData.put("type", "knowledge");
+                shareData.put("title", knowledgePost.getTitle());
+                shareData.put("content", knowledgePost.getContent());
+                shareData.put("author", knowledgePost.getAuthorNickname());
+                shareData.put("shareUrl", "https://didyouknow.app/post/" + postId);
+                shareData.put("shareText", String.format("📚 %s님의 흥미로운 지식을 확인해보세요!\n\n%s\n\n자세히 보기: https://didyouknow.app/post/%d", 
+                    knowledgePost.getAuthorNickname(), knowledgePost.getTitle(), postId));
+                
+                return ApiResponseHelper.success(shareData);
+            } catch (Exception e) {
+                // 퀴즈에서 찾기
+                try {
+                    QuizPostResponse quizPost = quizPostService.findById(postId);
+                    shareData.put("id", quizPost.getId());
+                    shareData.put("type", "quiz");
+                    shareData.put("title", quizPost.getQuestion());
+                    shareData.put("content", quizPost.getQuestion());
+                    shareData.put("author", quizPost.getAuthorNickname());
+                    shareData.put("shareUrl", "https://didyouknow.app/post/" + postId);
+                    shareData.put("shareText", String.format("🧠 %s님의 재미있는 퀴즈를 풀어보세요!\n\n%s\n\n자세히 보기: https://didyouknow.app/post/%d", 
+                        quizPost.getAuthorNickname(), quizPost.getQuestion(), postId));
+                    
+                    return ApiResponseHelper.success(shareData);
+                } catch (Exception ex) {
+                    return ApiResponseHelper.error(HttpStatus.NOT_FOUND, "공유할 게시물을 찾을 수 없습니다.");
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ApiResponseHelper.error(HttpStatus.INTERNAL_SERVER_ERROR, "공유 URL 생성 중 오류가 발생했습니다: " + e.getMessage());
+        }
+    }
 }
 
