@@ -17,7 +17,8 @@ public class JwtProvider {
 
     @Value("${jwt.secret}")
     private String secretKeyPlain;
-
+    
+    
     private Key secretKey;
 
     private static final long ACCESS_TOKEN_VALIDITY = 1000 * 60 * 60; // 1시간
