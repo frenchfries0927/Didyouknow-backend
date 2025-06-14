@@ -1,5 +1,6 @@
 package com.example.didyouknow.controller;
 
+import com.example.didyouknow.auth.CustomUserDetails;
 import com.example.didyouknow.common.ApiResponse;
 import com.example.didyouknow.common.ApiResponseHelper;
 import com.example.didyouknow.dto.user.ProfileRequest;
@@ -24,58 +25,34 @@ import java.util.List;
 public class UserController {
 
     private final UserService userService;
-    private final JwtProvider jwtProvider;
-
-    // JWT에서 사용자 ID 추출하는 헬퍼 메서드
-    private Long extractUserIdFromRequest(HttpServletRequest request) {
-        String authHeader = request.getHeader("Authorization");
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            String token = authHeader.replace("Bearer ", "");
-            if (jwtProvider.validateToken(token)) {
-                return jwtProvider.getUserIdFromToken(token);
-            }
-        }
-        return null;
-    }
 
     @PatchMapping("/me/complete-profile")
     public ResponseEntity<ApiResponse<Void>> completeProfile(@RequestBody ProfileRequest request,
-                                             HttpServletRequest httpRequest) {
-        Long userId = extractUserIdFromRequest(httpRequest);
-        if (userId == null) {
-            throw new IllegalArgumentException("유효하지 않은 토큰입니다.");
-        }
+                                                             @AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long userId = userDetails.getUserId();
         userService.completeProfile(userId, request);
         return ApiResponseHelper.success(null);
     }
 
     @GetMapping("/me/profile")
-    public ResponseEntity<ApiResponse<UserProfileResponse>> getMyProfile(HttpServletRequest request) {
-        Long userId = extractUserIdFromRequest(request);
-        if (userId == null) {
-            throw new IllegalArgumentException("유효하지 않은 토큰입니다.");
-        }
+    public ResponseEntity<ApiResponse<UserProfileResponse>> getMyProfile(HttpServletRequest request,
+                                                                         @AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long userId = userDetails.getUserId();
         UserProfileResponse profile = userService.getUserProfile(userId);
         return ApiResponseHelper.success(profile);
     }
 
     @GetMapping("/me/posts")
-    public ResponseEntity<ApiResponse<List<KnowledgePostResponse>>> getMyPosts(HttpServletRequest request) {
-        Long userId = extractUserIdFromRequest(request);
-        if (userId == null) {
-            throw new IllegalArgumentException("유효하지 않은 토큰입니다.");
-        }
+    public ResponseEntity<ApiResponse<List<KnowledgePostResponse>>> getMyPosts(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long userId = userDetails.getUserId();
         List<KnowledgePostResponse> posts = userService.getUserPosts(userId);
         return ApiResponseHelper.success(posts);
     }
 
     @GetMapping("/search")
     public ResponseEntity<ApiResponse<List<UserSearchResponse>>> searchUsers(@RequestParam("keyword") String keyword,
-                                                                             HttpServletRequest request) {
-        Long userId = extractUserIdFromRequest(request);
-        if (userId == null) {
-            throw new IllegalArgumentException("유효하지 않은 토큰입니다.");
-        }
+                                                                             @AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long userId = userDetails.getUserId();
         List<UserSearchResponse> users = userService.searchUsers(keyword, userId);
         return ApiResponseHelper.success(users);
     }

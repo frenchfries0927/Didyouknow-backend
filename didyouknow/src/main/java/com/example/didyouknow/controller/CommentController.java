@@ -1,5 +1,6 @@
 package com.example.didyouknow.controller;
 
+import com.example.didyouknow.auth.CustomUserDetails;
 import com.example.didyouknow.common.ApiResponse;
 import com.example.didyouknow.common.ApiResponseHelper;
 import com.example.didyouknow.dto.comment.CommentRequest;
@@ -7,6 +8,7 @@ import com.example.didyouknow.dto.comment.CommentResponse;
 import com.example.didyouknow.service.CommentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,8 +24,9 @@ public class CommentController {
 
     // 댓글 & 대댓글 작성 (userId는 쿼리 파라미터로 받음)
     @PostMapping
-    public ResponseEntity<ApiResponse<CommentResponse>> create(@RequestParam("userId") Long userId,
+    public ResponseEntity<ApiResponse<CommentResponse>> create(@AuthenticationPrincipal CustomUserDetails user,
                                                   @RequestBody CommentRequest request) {
+        long userId = user.getUserId();
         CommentResponse response = commentService.create(userId, request);
         return ApiResponseHelper.success(response);
     }
