@@ -20,6 +20,7 @@ repositories {
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
     annotationProcessor 'org.projectlombok:lombok:1.18.26'
     implementation 'org.projectlombok:lombok:1.18.26'
     implementation 'org.projectlombok:lombok:1.18.26'
@@ -38,4 +39,13 @@ dependencies {
 
 tasks.named('test') {
     useJUnitPlatform()
+}
+
+// JAR 파일 생성 설정
+jar {
+    enabled = false
+}
+
+bootJar {
+    archiveFileName = "didyouknow-backend.jar"
 }
