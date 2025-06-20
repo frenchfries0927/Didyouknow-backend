@@ -16,14 +16,13 @@ import com.example.didyouknow.repository.FollowRepository;
 import com.example.didyouknow.repository.UserBadgeRepository;
 import com.example.didyouknow.repository.LikeRepository;
 import com.example.didyouknow.repository.CommentRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.stream.Collectors;
 
 @Service
@@ -111,6 +110,26 @@ public class UserService {
                 followingCount,
                 hasBadge
         );
+    }
+
+    @Transactional
+    public UserResponse updateUserProfile(Long userId, String nickname, String profileImageUrl) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+
+        user.setNickname(nickname);
+        if (profileImageUrl != null) {
+            user.setProfileImageUrl(profileImageUrl);
+        }
+        user.setUpdatedAt(LocalDateTime.now());
+
+        return UserResponse.builder()
+                .id(user.getId())
+                .email(user.getEmail())
+                .nickname(user.getNickname())
+                .profileImageUrl(user.getProfileImageUrl())
+                .role(user.getRole())
+                .build();
     }
 
     public List<KnowledgePostResponse> getUserPosts(Long userId) {

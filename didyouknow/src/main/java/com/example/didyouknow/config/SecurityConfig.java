@@ -21,7 +21,7 @@ public class SecurityConfig {
                 // 모든 API 요청 허용
                 .authorizeHttpRequests(auth -> auth
 
-                        .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers("/auth/**", "/uploads/").permitAll()
                         .anyRequest().permitAll()
 
                 )
