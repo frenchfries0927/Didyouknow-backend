@@ -85,6 +85,18 @@ public class QuizPostService {
         quizPostRepository.deleteById(quizId);
     }
 
+    @Transactional
+    public void deleteByUserIdAndPostId(Long userId, Long postId) {
+        QuizPost quiz = quizPostRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("퀴즈를 찾을 수 없습니다."));
+        
+        if (!quiz.getAuthor().getId().equals(userId)) {
+            throw new IllegalArgumentException("퀴즈를 삭제할 권한이 없습니다.");
+        }
+        
+        quizPostRepository.deleteById(postId);
+    }
+
     private QuizPostResponse convertToResponse(QuizPost quiz) {
         List<String> imageUrls = quiz.getImages() != null ? 
             quiz.getImages().stream()

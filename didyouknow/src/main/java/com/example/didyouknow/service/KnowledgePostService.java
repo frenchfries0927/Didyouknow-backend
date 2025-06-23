@@ -78,6 +78,18 @@ public class KnowledgePostService {
         knowledgePostRepository.deleteById(postId);
     }
 
+    @Transactional
+    public void deleteByUserIdAndPostId(Long userId, Long postId) {
+        KnowledgePost post = knowledgePostRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다."));
+        
+        if (!post.getAuthor().getId().equals(userId)) {
+            throw new IllegalArgumentException("게시글을 삭제할 권한이 없습니다.");
+        }
+        
+        knowledgePostRepository.deleteById(postId);
+    }
+
     private KnowledgePostResponse convertToResponse(KnowledgePost post) {
         List<String> imageUrls = post.getImages().stream()
                 .sorted(Comparator.comparing(PostImage::getSequence))
