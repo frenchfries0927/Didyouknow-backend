@@ -151,7 +151,7 @@ public class FeedService {
             Boolean isLiked = userId != null && likeRepository.isLikedByUser(userId, "quiz", post.getId());
 
             allFeeds.add(new FeedResponse(
-                    post.getId(), "quiz", post.getQuestion(), "정답: 옵션 " + post.getCorrectOption(), post.getImageUrl(),
+                    post.getId(), "quiz", post.getQuestion(), post.getQuestion(), post.getImageUrl(),
                     post.getAuthor().getId(), post.getAuthor().getNickname(), post.getAuthor().getProfileImageUrl(),
                     post.getCreatedAt(), options, likesCount, commentsCount, isLiked
             ));

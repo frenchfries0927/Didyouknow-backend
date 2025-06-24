@@ -35,7 +35,7 @@ public class PostController {
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ApiResponse<KnowledgePostResponse>> create(
-            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestParam("userId") Long userId,
             @RequestParam("title") String title,
             @RequestParam("content") String content,
             @RequestParam(value = "publishDate", required = false, defaultValue = "2025-01-01") String publishDate,
@@ -57,7 +57,6 @@ public class PostController {
             request.setContent(content);
             request.setPublishDate(publishDate);
 
-            long userId = userDetails.getUserId();
             KnowledgePostResponse response = knowledgePostService.create(userId, request, imageUrls);
             return ApiResponseHelper.success(response);
 

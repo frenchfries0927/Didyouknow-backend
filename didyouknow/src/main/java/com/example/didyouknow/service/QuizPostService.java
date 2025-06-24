@@ -19,6 +19,8 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.Map;
+import java.util.HashMap;
 
 @Service
 @RequiredArgsConstructor
@@ -95,6 +97,23 @@ public class QuizPostService {
         }
         
         quizPostRepository.deleteById(postId);
+    }
+
+    // 퀴즈 정답 체크 메서드 추가
+    public Map<String, Object> checkAnswer(Long quizId, Integer userAnswer) {
+        QuizPost quiz = quizPostRepository.findById(quizId)
+                .orElseThrow(() -> new IllegalArgumentException("퀴즈를 찾을 수 없습니다."));
+        
+        // userAnswer는 0부터 시작하는 인덱스, correctOption은 1부터 시작
+        Integer correctOptionIndex = quiz.getCorrectOption() - 1;
+        boolean isCorrect = userAnswer.equals(correctOptionIndex);
+        
+        Map<String, Object> result = new HashMap<>();
+        result.put("correct", isCorrect);
+        result.put("correctAnswer", correctOptionIndex); // 0부터 시작하는 인덱스 반환
+        result.put("userAnswer", userAnswer);
+        
+        return result;
     }
 
     private QuizPostResponse convertToResponse(QuizPost quiz) {

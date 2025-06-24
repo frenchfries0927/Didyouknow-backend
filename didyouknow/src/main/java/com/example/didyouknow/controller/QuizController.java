@@ -16,7 +16,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/quizzes")
@@ -28,7 +30,7 @@ public class QuizController {
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ApiResponse<QuizPostResponse>> create(
-            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestParam("userId") Long userId,
             @RequestParam("question") String question,
             @RequestParam("option1") String option1,
             @RequestParam("option2") String option2,
@@ -57,7 +59,6 @@ public class QuizController {
                     }
                 }
             }
-            long userId = userDetails.getUserId();
             QuizPostResponse response = quizPostService.create(userId, request, imageUrls);
             return ApiResponseHelper.success(response);
 
@@ -82,5 +83,20 @@ public class QuizController {
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable("quizId") Long quizId) {
         quizPostService.delete(quizId);
         return ApiResponseHelper.success(null);
+    }
+
+    // 퀴즈 정답 체크 API 추가
+    @PostMapping("/{quizId}/check-answer")
+    public ResponseEntity<ApiResponse<Map<String, Object>>> checkAnswer(
+            @PathVariable("quizId") Long quizId,
+            @RequestBody Map<String, Integer> request) {
+        
+        try {
+            Integer userAnswer = request.get("answer"); // 0, 1, 2, 3 (인덱스)
+            Map<String, Object> result = quizPostService.checkAnswer(quizId, userAnswer);
+            return ApiResponseHelper.success(result);
+        } catch (Exception e) {
+            return ApiResponseHelper.error(ResponseCode.SERVER_ERROR, "정답 체크 중 오류 발생: " + e.getMessage());
+        }
     }
 }
